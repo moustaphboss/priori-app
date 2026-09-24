@@ -5,6 +5,8 @@ import type { Task } from '@/domain/types';
 export interface TaskRepository {
   loadTasks(): Promise<Task[]>;
   saveTask(task: Task): Promise<void>;
+  /** Replace everything, e.g. to reset the demo. */
+  replaceAll(tasks: Task[]): Promise<void>;
 }
 
 export function createInMemoryTaskRepository(seed: Task[]): TaskRepository {
@@ -15,6 +17,10 @@ export function createInMemoryTaskRepository(seed: Task[]): TaskRepository {
     },
     async saveTask(task) {
       tasks.set(task.id, task);
+    },
+    async replaceAll(next) {
+      tasks.clear();
+      next.forEach((t) => tasks.set(t.id, t));
     },
   };
 }

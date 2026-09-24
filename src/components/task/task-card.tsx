@@ -50,7 +50,7 @@ export function TaskCard({ task, now, reason, elapsedMs, onAction }: TaskCardPro
               {meta}
             </ThemedText>
           )}
-          {reason && <ThemedText type="smallBold">{reason}</ThemedText>}
+          {reason && reason !== due && <ThemedText type="smallBold">{reason}</ThemedText>}
         </View>
         <PriorityBadge priority={task.priority} />
       </View>

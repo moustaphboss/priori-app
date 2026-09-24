@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 
-import { mockAssociate } from '@/data/mock-tasks';
+import { createMockTasks, mockAssociate } from '@/data/mock-tasks';
 import { taskRepository } from '@/data/task-repository';
 import { rankTasks } from '@/domain/priority';
+import { shouldEscalate } from '@/domain/safety';
 import { transition } from '@/domain/state-machine';
 import type { Associate, Task } from '@/domain/types';
 
@@ -20,6 +21,14 @@ type TaskStore = {
   /** Resume a paused task, pausing whatever is in progress. */
   resume: (taskId: string) => void;
   complete: (taskId: string) => void;
+  /** Add a new task, e.g. an ad hoc event. */
+  addTask: (task: Task) => void;
+  /** Associate takes a P0 ("I'm on it"): records the ack and starts it. */
+  acknowledge: (taskId: string) => void;
+  /** Escalate every P0 whose ack window has run out. Called by the safety watchdog. */
+  escalateOverdue: (now: number) => void;
+  /** Restore the seed data (demo helper). */
+  reset: () => void;
 };
 
 const EMPTY_STACK: string[] = [];
@@ -54,8 +63,12 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
     pauseCurrent(now);
     setStack((stack) => stack.filter((id) => id !== taskId));
     update(taskId, (task) => {
+      // Starting a P0 counts as acknowledging it.
+      if (task.priority === 'P0' && task.acknowledgedAt === undefined) {
+        task = { ...task, acknowledgedAt: now };
+      }
       const assigned =
-        task.state === 'READY'
+        task.state === 'READY' || task.state === 'ESCALATED'
           ? transition({ ...task, assigneeId: associate.id }, 'ASSIGNED', now)
           : task;
       return transition(assigned, 'IN_PROGRESS', now);
@@ -86,6 +99,29 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
 
     complete: (taskId) => {
       update(taskId, (task) => transition(task, 'COMPLETED', Date.now()));
+    },
+
+    addTask: (task) => {
+      set({ tasks: [...get().tasks, task] });
+      void taskRepository.saveTask(task);
+    },
+
+    acknowledge: (taskId) => {
+      const now = Date.now();
+      update(taskId, (task) => ({ ...task, acknowledgedAt: now }));
+      activate(taskId, now);
+    },
+
+    escalateOverdue: (now) => {
+      for (const task of get().tasks) {
+        if (shouldEscalate(task, now)) update(task.id, (t) => transition(t, 'ESCALATED', now));
+      }
+    },
+
+    reset: () => {
+      const tasks = createMockTasks(Date.now());
+      set({ tasks, pauseStacks: {} });
+      void taskRepository.replaceAll(tasks);
     },
   };
 });

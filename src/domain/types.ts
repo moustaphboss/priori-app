@@ -40,6 +40,8 @@ export type Task = {
   startedAt?: number;
   /** Epoch ms. */
   completedAt?: number;
+  /** Epoch ms when an associate acknowledged a P0 alert. */
+  acknowledgedAt?: number;
 };
 
 export type Associate = {
