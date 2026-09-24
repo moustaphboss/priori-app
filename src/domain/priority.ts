@@ -87,6 +87,19 @@ export function rankTasks(tasks: Task[], associate: Associate, now: number): Ran
     });
 }
 
+/**
+ * What to offer when nothing is in progress: the most recently paused task,
+ * unless a waiting task is clearly more urgent (same gap rule as preemption).
+ */
+export function pickNext(
+  ranked: RankedTask[],
+  paused: RankedTask | undefined,
+): RankedTask | undefined {
+  if (!paused) return ranked[0];
+  if (ranked[0] && shouldPreempt(paused, ranked[0])) return ranked[0];
+  return { ...paused, reason: 'Paused — pick up where you left off' };
+}
+
 /** Whether `candidate` is enough more urgent than `current` to interrupt it. */
 export function shouldPreempt(current: RankedTask, candidate: RankedTask): boolean {
   if (candidate.task.priority === 'P0') return current.task.priority !== 'P0';
