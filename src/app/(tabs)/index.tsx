@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useShallow } from 'zustand/react/shallow';
 
@@ -9,7 +10,13 @@ import { SwitchPrompt } from '@/components/now/switch-prompt';
 import { UpNextList } from '@/components/now/up-next-list';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import {
+  BottomTabInset,
+  MaxContentWidth,
+  PriorityColors,
+  Spacing,
+  TouchTarget,
+} from '@/constants/theme';
 import { pickNext, rankTasks, scoreTask, shouldPreempt } from '@/domain/priority';
 import type { Task, TaskAction } from '@/domain/types';
 import { useNow } from '@/hooks/use-now';
@@ -53,7 +60,16 @@ export default function NowScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content}>
-          <ThemedText type="title">Now</ThemedText>
+          <View style={styles.header}>
+            <ThemedText type="title">Now</ThemedText>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Report something"
+              onPress={() => router.push('/intake')}
+              style={({ pressed }) => [styles.report, pressed && styles.pressed]}>
+              <ThemedText style={styles.reportLabel}>+ Report</ThemedText>
+            </Pressable>
+          </View>
 
           {showSwitch && (
             <SwitchPrompt
@@ -85,6 +101,26 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     maxWidth: MaxContentWidth,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  report: {
+    minHeight: TouchTarget,
+    paddingHorizontal: Spacing.four,
+    borderRadius: TouchTarget / 2,
+    justifyContent: 'center',
+    backgroundColor: PriorityColors.P2,
+  },
+  reportLabel: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 700,
+  },
+  pressed: {
+    opacity: 0.7,
   },
   content: {
     paddingHorizontal: Spacing.three,

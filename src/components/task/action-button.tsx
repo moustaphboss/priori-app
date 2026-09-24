@@ -7,20 +7,24 @@ type ActionButtonProps = {
   label: string;
   onPress: () => void;
   tone?: 'primary' | 'secondary';
+  disabled?: boolean;
 };
 
-export function ActionButton({ label, onPress, tone = 'primary' }: ActionButtonProps) {
+export function ActionButton({ label, onPress, tone = 'primary', disabled }: ActionButtonProps) {
   const theme = useTheme();
   const isPrimary = tone === 'primary';
 
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor: isPrimary ? theme.text : theme.backgroundSelected },
         pressed && styles.pressed,
+        disabled && styles.disabled,
       ]}>
       <Text style={[styles.label, { color: isPrimary ? theme.background : theme.text }]}>
         {label}
@@ -40,6 +44,9 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.7,
+  },
+  disabled: {
+    opacity: 0.35,
   },
   label: {
     fontSize: 18,
