@@ -26,6 +26,17 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/** Priority class colors. Dark enough for white badge text in both themes. */
+export const PriorityColors = {
+  P0: '#D92D20',
+  P1: '#C4520A',
+  P2: '#1F6FEB',
+  P3: '#6B7280',
+} as const;
+
+/** Minimum height for primary touch targets (one-handed use on the shop floor). */
+export const TouchTarget = 56;
+
 export const Fonts = Platform.select({
   ios: {
     /** iOS `UIFontDescriptorSystemDesignDefault` */

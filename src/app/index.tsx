@@ -1,61 +1,47 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
+import { CurrentTask } from '@/components/now/current-task';
+import { UpNextList } from '@/components/now/up-next-list';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { rankTasks } from '@/domain/priority';
+import type { Task, TaskAction } from '@/domain/types';
+import { useNow } from '@/hooks/use-now';
+import { selectCurrentTask, useTaskStore } from '@/store/task-store';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const UP_NEXT_COUNT = 4;
 
-export default function HomeScreen() {
+export default function NowScreen() {
+  const now = useNow();
+  const tasks = useTaskStore((s) => s.tasks);
+  const associate = useTaskStore((s) => s.associate);
+  const current = useTaskStore(selectCurrentTask);
+  const start = useTaskStore((s) => s.start);
+  const complete = useTaskStore((s) => s.complete);
+
+  const ranked = rankTasks(tasks, associate, now);
+  // With nothing in progress, the top-ranked task is offered in the "Now" slot instead.
+  const suggestion = current ? undefined : ranked[0];
+  const upNext = ranked.slice(suggestion ? 1 : 0, (suggestion ? 1 : 0) + UP_NEXT_COUNT);
+
+  const handleAction = (task: Task, action: TaskAction) => {
+    if (action === 'start') start(task.id);
+    else if (action === 'complete') complete(task.id);
+    else console.log(`[task] ${action} ${task.id} — not wired up yet`);
+  };
+
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <SafeAreaView edges={['top']} style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <ThemedText type="title">Now</ThemedText>
+          <CurrentTask current={current} suggestion={suggestion} now={now} onAction={handleAction} />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+          <ThemedText type="subtitle">Up next</ThemedText>
+          <UpNextList ranked={upNext} now={now} />
+        </ScrollView>
       </SafeAreaView>
     </ThemedView>
   );
@@ -64,35 +50,17 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
     maxWidth: MaxContentWidth,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
+  content: {
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    paddingTop: Spacing.four,
+    paddingBottom: BottomTabInset + Spacing.four,
+    gap: Spacing.three,
   },
 });
