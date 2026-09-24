@@ -38,6 +38,8 @@ export type Task = {
   workedMs: number;
   /** Epoch ms when the current IN_PROGRESS session began. */
   startedAt?: number;
+  /** Epoch ms when last paused. Orders the pause stack. */
+  pausedAt?: number;
   /** Epoch ms. */
   completedAt?: number;
   /** Epoch ms when an associate acknowledged a P0 alert. */

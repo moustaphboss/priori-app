@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useShallow } from 'zustand/react/shallow';
 
 import { CurrentTask } from '@/components/now/current-task';
 import { PauseStack } from '@/components/now/pause-stack';
@@ -12,7 +13,7 @@ import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { pickNext, rankTasks, scoreTask, shouldPreempt } from '@/domain/priority';
 import type { Task, TaskAction } from '@/domain/types';
 import { useNow } from '@/hooks/use-now';
-import { selectCurrentTask, selectPauseStackIds, useTaskStore } from '@/store/task-store';
+import { selectCurrentTask, selectPausedTasks, useTaskStore } from '@/store/task-store';
 
 const UP_NEXT_COUNT = 4;
 
@@ -21,14 +22,10 @@ export default function NowScreen() {
   const tasks = useTaskStore((s) => s.tasks);
   const associate = useTaskStore((s) => s.associate);
   const current = useTaskStore(selectCurrentTask);
-  const pausedIds = useTaskStore(selectPauseStackIds);
   const { start, pause, resume, complete } = useTaskStore.getState();
   const [dismissedId, setDismissedId] = useState<string>();
 
-  const paused = [...pausedIds]
-    .reverse()
-    .map((id) => tasks.find((t) => t.id === id))
-    .filter((t): t is Task => t !== undefined);
+  const paused = useTaskStore(useShallow(selectPausedTasks));
   const ranked = rankTasks(tasks, associate, now);
 
   // Nothing in progress: offer the paused task to resume, or the top-ranked one.
@@ -46,10 +43,10 @@ export default function NowScreen() {
     shouldPreempt(scoreTask(current, associate, now), candidate);
 
   const handleAction = (task: Task, action: TaskAction) => {
-    if (action === 'start') start(task.id);
-    else if (action === 'pause') pause(task.id);
-    else if (action === 'resume') resume(task.id);
-    else complete(task.id);
+    if (action === 'start') void start(task.id);
+    else if (action === 'pause') void pause(task.id);
+    else if (action === 'resume') void resume(task.id);
+    else void complete(task.id);
   };
 
   return (
@@ -61,7 +58,7 @@ export default function NowScreen() {
           {showSwitch && (
             <SwitchPrompt
               candidate={candidate}
-              onSwitch={() => start(candidate.task.id)}
+              onSwitch={() => void start(candidate.task.id)}
               onDismiss={
                 candidate.task.priority === 'P0' ? undefined : () => setDismissedId(candidate.task.id)
               }
@@ -69,7 +66,7 @@ export default function NowScreen() {
           )}
 
           <CurrentTask current={current} suggestion={suggestion} now={now} onAction={handleAction} />
-          <PauseStack tasks={paused} now={now} onResume={(task) => resume(task.id)} />
+          <PauseStack tasks={paused} now={now} onResume={(task) => void resume(task.id)} />
 
           <ThemedText type="subtitle">Up next</ThemedText>
           <UpNextList ranked={upNext} now={now} />

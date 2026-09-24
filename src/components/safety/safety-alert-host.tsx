@@ -42,7 +42,7 @@ export function SafetyAlertHost() {
           task={top}
           now={now}
           queued={pending.length - 1}
-          onAcknowledge={() => acknowledge(top.id)}
+          onAcknowledge={() => void acknowledge(top.id)}
           onLeaveToManager={() => setLeftToManager((ids) => [...ids, top.id])}
         />
       )}

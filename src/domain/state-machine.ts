@@ -31,7 +31,11 @@ export function transition(task: Task, to: TaskState, now: number): Task {
     next.workedMs = task.workedMs + (now - (task.startedAt ?? now));
     next.startedAt = undefined;
   }
-  if (to === 'IN_PROGRESS') next.startedAt = now;
+  if (to === 'PAUSED') next.pausedAt = now;
+  if (to === 'IN_PROGRESS') {
+    next.startedAt = now;
+    next.pausedAt = undefined;
+  }
   if (to === 'COMPLETED') next.completedAt = now;
 
   return next;

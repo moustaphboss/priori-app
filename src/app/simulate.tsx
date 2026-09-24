@@ -10,6 +10,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing, TouchTarget } from '@/constants/theme';
 import { createEventTask, SIMULATED_EVENTS, type SimulatedEvent } from '@/data/mock-events';
+import { dataSource } from '@/data/task-repository';
 import { useTaskStore } from '@/store/task-store';
 
 /** Dev panel: inject mock events to demo the ranking changing live. */
@@ -17,11 +18,10 @@ export default function SimulateScreen() {
   const { addTask, reset } = useTaskStore.getState();
   const [lastAdded, setLastAdded] = useState<string>();
 
-  const fire = (event: SimulatedEvent) => {
+  const fire = async (event: SimulatedEvent) => {
     const task = createEventTask(event);
-    addTask(task);
-    setLastAdded(task.title);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (await addTask(task)) setLastAdded(task.title);
   };
 
   return (
@@ -32,13 +32,16 @@ export default function SimulateScreen() {
           <ThemedText themeColor="textSecondary">
             Inject store events, then switch to Now to see the ranking react.
           </ThemedText>
+          <ThemedText type="smallBold" themeColor="textSecondary">
+            {dataSource === 'supabase' ? 'Data: Supabase (live, shared)' : 'Data: offline mock'}
+          </ThemedText>
 
           <View style={styles.list}>
             {SIMULATED_EVENTS.map((event) => (
               <Pressable
                 key={event.id}
                 accessibilityRole="button"
-                onPress={() => fire(event)}
+                onPress={() => void fire(event)}
                 style={({ pressed }) => pressed && styles.pressed}>
                 <ThemedView type="backgroundElement" style={styles.row}>
                   <TaskTypeIcon type={event.type} />
@@ -63,7 +66,7 @@ export default function SimulateScreen() {
               label="Reset demo"
               tone="secondary"
               onPress={() => {
-                reset();
+                void reset();
                 setLastAdded(undefined);
               }}
             />
