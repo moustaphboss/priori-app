@@ -67,6 +67,9 @@ export function createInMemoryTaskRepository(
     // Nothing changes behind this repository's back.
     subscribe: () => () => {},
 
+    // No server to send pushes offline.
+    registerPushToken: async () => {},
+
     start: (taskId, associateId) => atomic(() => start(taskId, associateId, Date.now())),
 
     pause: (taskId, associateId, nextTaskId) =>

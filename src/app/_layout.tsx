@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { SafetyAlertHost } from '@/components/safety/safety-alert-host';
+import { usePushRegistration } from '@/hooks/use-push-registration';
 import { useSafetyWatchdog } from '@/hooks/use-safety-watchdog';
 import { useTaskStore } from '@/store/task-store';
 
@@ -14,6 +15,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
 
   useSafetyWatchdog();
+  usePushRegistration();
 
   useEffect(() => {
     void useTaskStore.getState().load();

@@ -30,6 +30,8 @@ export interface TaskRepository {
   acknowledge(taskId: string, associateId: string): Promise<Task[]>;
   escalateOverdue(): Promise<Task[]>;
   addTask(task: Task): Promise<Task[]>;
+  /** Link this device's push token to a persona (associate id or 'manager'). */
+  registerPushToken(token: string, persona: string): Promise<void>;
   /** Restore the demo seed. Returns the full task list. */
   reset(): Promise<Task[]>;
 }

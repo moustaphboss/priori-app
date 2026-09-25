@@ -3,7 +3,7 @@ import type { Associate, Task } from '@/domain/types';
 
 export const mockAssociates: Associate[] = [
   { id: 'a1', name: 'Sam', skills: ['restock', 'check', 'customer'], location: 'Aisle 7' },
-  { id: 'a2', name: 'Priya', skills: ['bopis', 'customer'], location: 'Pickup desk' },
+  { id: 'a2', name: 'Moustapha', skills: ['bopis', 'customer'], location: 'Pickup desk' },
   { id: 'a3', name: 'Tom', skills: ['spill', 'restock', 'check'], location: 'Aisle 2' },
   { id: 'a4', name: 'Lea', skills: ['check', 'customer', 'spill'], location: 'Bakery' },
 ];

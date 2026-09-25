@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 import type { TaskChange, TaskRepository } from '@/data/task-repository';
 import type {
   Associate,
@@ -149,6 +151,15 @@ export function createSupabaseTaskRepository(): TaskRepository {
       rpc('acknowledge_p0', { p_task: taskId, p_associate: associateId }),
 
     escalateOverdue: () => rpc('escalate_overdue_p0'),
+
+    registerPushToken: async (token, persona) => {
+      const { error } = await getSupabase().rpc('register_push_token', {
+        p_token: token,
+        p_persona: persona,
+        p_platform: Platform.OS,
+      });
+      if (error) throw new Error(error.message);
+    },
 
     addTask: async (task) => {
       // created_at, worked_ms and version come from the database.
