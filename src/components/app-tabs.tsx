@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { BrandColor, Colors } from '@/constants/theme';
 import { useTaskStore } from '@/store/task-store';
 
 export default function AppTabs() {
@@ -13,6 +13,7 @@ export default function AppTabs() {
     <NativeTabs
       backgroundColor={colors.background}
       indicatorColor={colors.backgroundElement}
+      tintColor={BrandColor}
       labelStyle={{ selected: { color: colors.text } }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>{isManager ? 'Store' : 'Now'}</NativeTabs.Trigger.Label>

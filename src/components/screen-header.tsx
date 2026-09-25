@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { PersonaSwitcher } from '@/components/persona-switcher';
 import { ThemedText } from '@/components/themed-text';
-import { PriorityColors, Spacing, TouchTarget } from '@/constants/theme';
+import { BrandColor, Spacing, TouchTarget } from '@/constants/theme';
 
 type ScreenHeaderProps = {
   title: string;
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     borderRadius: TouchTarget / 2,
     justifyContent: 'center',
-    backgroundColor: PriorityColors.P2,
+    backgroundColor: BrandColor,
   },
   actionLabel: {
     color: '#ffffff',

@@ -26,6 +26,9 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+/** Brand / primary colour: primary buttons, header actions, selection, links. White text passes AA. */
+export const BrandColor = '#653DFC';
+
 /** Priority class colors. Dark enough for white badge text in both themes. */
 export const PriorityColors = {
   P0: '#D92D20',

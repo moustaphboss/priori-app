@@ -11,7 +11,7 @@ import { PriorityBadge } from '@/components/task/priority-badge';
 import { TaskTypeIcon } from '@/components/task/task-type-icon';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
+import { BrandColor, Spacing } from '@/constants/theme';
 import { recommendAssignees } from '@/domain/dispatch';
 import { createAdhocTask, titleFromDescription } from '@/domain/intake';
 import { useTaskDraft } from '@/hooks/use-task-draft';
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
   },
   editLabel: {
-    color: '#1F6FEB',
+    color: BrandColor,
   },
   pressed: {
     opacity: 0.6,

@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { TaskTypeIcon } from '@/components/task/task-type-icon';
 import { ThemedText } from '@/components/themed-text';
-import { Spacing, TouchTarget } from '@/constants/theme';
+import { BrandColor, Spacing, TouchTarget } from '@/constants/theme';
 import type { TaskType } from '@/domain/types';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -36,7 +36,7 @@ export function TypePicker({ value, onChange }: TypePickerProps) {
               styles.option,
               {
                 backgroundColor: theme.backgroundElement,
-                borderColor: selected ? theme.text : 'transparent',
+                borderColor: selected ? BrandColor : 'transparent',
               },
               pressed && styles.pressed,
             ]}>
