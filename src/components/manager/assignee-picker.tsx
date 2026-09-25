@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { BrandColor, Spacing, TouchTarget } from '@/constants/theme';
+import { Spacing, TouchTarget } from '@/constants/theme';
 import type { AssigneeRecommendation } from '@/domain/dispatch';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -37,12 +37,12 @@ export function AssigneePicker({
         styles.option,
         {
           backgroundColor: theme.backgroundElement,
-          borderColor: selected ? BrandColor : 'transparent',
+          borderColor: selected ? theme.text : 'transparent',
         },
         pressed && styles.pressed,
       ]}>
-      <View style={[styles.radio, { borderColor: selected ? BrandColor : theme.textSecondary }]}>
-        {selected && <View style={[styles.dot, { backgroundColor: BrandColor }]} />}
+      <View style={[styles.radio, { borderColor: selected ? theme.text : theme.textSecondary }]}>
+        {selected && <View style={[styles.dot, { backgroundColor: theme.text }]} />}
       </View>
       <View style={styles.text}>{body}</View>
     </Pressable>

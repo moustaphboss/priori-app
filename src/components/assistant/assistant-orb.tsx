@@ -12,8 +12,8 @@ import Animated, {
 
 /** Blobs that drift around the orb's centre; their overlap gives the Siri-like colour blend. */
 const BLOBS = [
-  { color: '#653DFC', dx: -0.14, dy: -0.1 },
-  { color: '#3B82F6', dx: 0.14, dy: -0.06 },
+  { color: '#1F6FEB', dx: -0.14, dy: -0.1 },
+  { color: '#8B5CF6', dx: 0.14, dy: -0.06 },
   { color: '#EC4899', dx: 0, dy: 0.14 },
 ];
 

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { BrandColor, Spacing, TouchTarget } from '@/constants/theme';
+import { Spacing, TouchTarget } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type ActionButtonProps = {
@@ -22,11 +22,11 @@ export function ActionButton({ label, onPress, tone = 'primary', disabled }: Act
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: isPrimary ? BrandColor : theme.backgroundSelected },
+        { backgroundColor: isPrimary ? theme.text : theme.backgroundSelected },
         pressed && styles.pressed,
         disabled && styles.disabled,
       ]}>
-      <Text style={[styles.label, { color: isPrimary ? '#ffffff' : theme.text }]}>
+      <Text style={[styles.label, { color: isPrimary ? theme.background : theme.text }]}>
         {label}
       </Text>
     </Pressable>

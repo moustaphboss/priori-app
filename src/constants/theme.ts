@@ -26,7 +26,7 @@ export const Colors = {
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-/** Brand / primary colour: primary buttons, header actions, selection, links. White text passes AA. */
+/** Brand colour: header action buttons (+ Report / + Dispatch) and the tab bar. White text passes AA. */
 export const BrandColor = '#653DFC';
 
 /** Priority class colors. Dark enough for white badge text in both themes. */
