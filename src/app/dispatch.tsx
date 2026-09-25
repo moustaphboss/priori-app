@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
@@ -19,7 +19,9 @@ export default function DispatchScreen() {
   const associates = useTaskStore((s) => s.associates);
   const tasks = useTaskStore((s) => s.tasks);
   const { addTask } = useTaskStore.getState();
-  const draft = useTaskDraft();
+  // Pre-filled when coming from the assistant ("Edit details").
+  const { text } = useLocalSearchParams<{ text?: string }>();
+  const draft = useTaskDraft('', text);
   // Undefined until the manager picks: follows the top recommendation.
   const [choice, setChoice] = useState<AssigneeChoice>();
   const [saving, setSaving] = useState(false);
@@ -41,6 +43,7 @@ export default function DispatchScreen() {
     const saved = await addTask(
       createAdhocTask({
         description: draft.description,
+        title: draft.title,
         type: draft.type,
         priority: draft.priority,
         location: draft.location,

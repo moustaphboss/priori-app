@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
 import { TaskDraftFields } from '@/components/intake/task-draft-fields';
@@ -13,7 +13,9 @@ import { useTaskStore } from '@/store/task-store';
 export default function IntakeScreen() {
   const associate = useTaskStore((s) => s.associate);
   const { addTask } = useTaskStore.getState();
-  const draft = useTaskDraft(associate.location);
+  // Pre-filled when coming from the assistant ("Edit details").
+  const { text } = useLocalSearchParams<{ text?: string }>();
+  const draft = useTaskDraft(associate.location, text);
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
@@ -21,6 +23,7 @@ export default function IntakeScreen() {
     const saved = await addTask(
       createAdhocTask({
         description: draft.description,
+        title: draft.title,
         type: draft.type,
         priority: draft.priority,
         location: draft.location,

@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { TeamMemberCard } from '@/components/manager/team-member-card';
+import { ASSISTANT_BUTTON_CLEARANCE } from '@/components/assistant/assistant-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { TaskCard } from '@/components/task/task-card';
 import { ThemedText } from '@/components/themed-text';
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
-    paddingBottom: BottomTabInset + Spacing.four,
+    paddingBottom: BottomTabInset + ASSISTANT_BUTTON_CLEARANCE + Spacing.four,
     gap: Spacing.three,
   },
   pressed: {

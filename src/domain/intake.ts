@@ -10,7 +10,31 @@ export type Suggestion = {
   source: 'rules' | 'ai';
   /** False when nothing in the text was recognised and these are just defaults. */
   confident: boolean;
+  /** Clean task title (AI only). Rules derive the title from the description instead. */
+  title?: string;
+  /** Location mentioned in the text (AI only). */
+  location?: string;
 };
+
+/**
+ * Combine the rule-based and AI suggestions. AI wins when present, except for the safety
+ * floor: if the rules found a P0 keyword, the result stays P0. AI can raise a priority to P0
+ * but never lower one away from it.
+ */
+export function combineSuggestions(
+  rules: Suggestion | undefined,
+  ai: Suggestion | undefined,
+): Suggestion | undefined {
+  if (!ai) return rules;
+  if (rules?.priority === 'P0' && ai.priority !== 'P0') {
+    return {
+      ...ai,
+      priority: 'P0',
+      reason: `Kept at P0 by safety rule (${rules.reason.toLowerCase()})`,
+    };
+  }
+  return ai;
+}
 
 type Rule = { pattern: RegExp; type: TaskType; priority: PriorityClass };
 
@@ -54,6 +78,8 @@ export function suggestFromText(text: string): Suggestion | undefined {
 
 export type AdhocDraft = {
   description: string;
+  /** Overrides the title derived from the description (e.g. a cleaner AI title). */
+  title?: string;
   type: TaskType;
   priority: PriorityClass;
   location?: string;
@@ -96,7 +122,7 @@ export function createAdhocTask(draft: AdhocDraft, now = Date.now()): Task {
   const dueIn = DUE_IN[draft.priority];
   return {
     id: `adhoc-${now}-${Math.random().toString(36).slice(2, 8)}`,
-    title: titleFromDescription(draft.description),
+    title: draft.title?.trim() || titleFromDescription(draft.description),
     type: draft.type,
     origin: 'adhoc',
     priority: draft.priority,

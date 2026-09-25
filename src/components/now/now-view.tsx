@@ -8,6 +8,7 @@ import { CurrentTask } from '@/components/now/current-task';
 import { PauseStack } from '@/components/now/pause-stack';
 import { SwitchPrompt } from '@/components/now/switch-prompt';
 import { UpNextList } from '@/components/now/up-next-list';
+import { ASSISTANT_BUTTON_CLEARANCE } from '@/components/assistant/assistant-button';
 import { ScreenHeader } from '@/components/screen-header';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
-    paddingBottom: BottomTabInset + Spacing.four,
+    paddingBottom: BottomTabInset + ASSISTANT_BUTTON_CLEARANCE + Spacing.four,
     gap: Spacing.three,
   },
 });

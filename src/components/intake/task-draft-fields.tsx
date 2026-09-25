@@ -29,6 +29,11 @@ export function TaskDraftFields({ draft, placeholder }: TaskDraftFieldsProps) {
         style={[inputStyle, styles.description]}
         accessibilityLabel={placeholder}
       />
+      {draft.title && draft.title !== draft.description.trim() && (
+        <ThemedText type="small" themeColor="textSecondary" style={styles.titlePreview}>
+          Saved as “{draft.title}”
+        </ThemedText>
+      )}
 
       <View style={styles.field}>
         <ThemedText type="smallBold" themeColor="textSecondary">
@@ -49,13 +54,15 @@ export function TaskDraftFields({ draft, placeholder }: TaskDraftFieldsProps) {
           <ThemedText type="smallBold" themeColor="textSecondary">
             PRIORITY
           </ThemedText>
-          {draft.suggestion && (
-            <ThemedText type="small" themeColor="textSecondary">
-              {draft.usingSuggestion ? 'Suggested' : 'Changed'} · {draft.suggestion.reason}
-            </ThemedText>
-          )}
+          <SuggestionSource draft={draft} />
         </View>
         <PriorityPicker value={draft.priority} onChange={draft.setPriority} />
+        {draft.suggestion && (
+          <ThemedText type="small" themeColor="textSecondary">
+            {draft.usingSuggestion ? '' : 'You changed the suggestion. '}
+            {draft.suggestion.reason}
+          </ThemedText>
+        )}
         {draft.priority === 'P0' && (
           <ThemedText type="small" themeColor="textSecondary">
             P0 alerts immediately and escalates to a manager if nobody responds in 30 s.
@@ -73,7 +80,31 @@ export function TaskDraftFields({ draft, placeholder }: TaskDraftFieldsProps) {
   );
 }
 
+/** Where the suggestion came from: AI, rules, or AI still thinking / unavailable. */
+function SuggestionSource({ draft }: { draft: TaskDraftState }) {
+  if (!draft.suggestion && draft.aiStatus === 'off') return null;
+  const source = draft.suggestion?.source === 'ai' ? 'AI' : 'Rules';
+  const status =
+    draft.aiStatus === 'thinking'
+      ? 'AI thinking…'
+      : draft.aiStatus === 'failed'
+        ? 'AI unavailable, using rules'
+        : `Suggested by ${source}`;
+  return (
+    <ThemedText type="small" themeColor="textSecondary" style={styles.source}>
+      {status}
+    </ThemedText>
+  );
+}
+
 const styles = StyleSheet.create({
+  titlePreview: {
+    marginTop: -Spacing.three,
+  },
+  source: {
+    flexShrink: 1,
+    textAlign: 'right',
+  },
   input: {
     minHeight: TouchTarget,
     borderRadius: Spacing.three,
