@@ -1,12 +1,12 @@
 import { MINUTE } from '@/domain/time';
 import type { Associate, Task } from '@/domain/types';
 
-export const mockAssociate: Associate = {
-  id: 'a1',
-  name: 'Sam',
-  skills: ['restock', 'check', 'customer'],
-  location: 'Aisle 7',
-};
+export const mockAssociates: Associate[] = [
+  { id: 'a1', name: 'Sam', skills: ['restock', 'check', 'customer'], location: 'Aisle 7' },
+  { id: 'a2', name: 'Priya', skills: ['bopis', 'customer'], location: 'Pickup desk' },
+  { id: 'a3', name: 'Tom', skills: ['spill', 'restock', 'check'], location: 'Aisle 2' },
+  { id: 'a4', name: 'Lea', skills: ['check', 'customer', 'spill'], location: 'Bakery' },
+];
 
 /** Seed data for a shift in progress. Times are relative to `now` so the demo always looks fresh. */
 export function createMockTasks(now: number): Task[] {
@@ -83,6 +83,70 @@ export function createMockTasks(now: number): Task[] {
       estimatedMinutes: 15,
       customerImpact: 0.1,
       createdAt: now - 180 * MINUTE,
+      workedMs: 0,
+    },
+    // Other associates, so the manager view has a team to prioritise across.
+    {
+      id: 't6',
+      title: 'Pick BOPIS order #4819',
+      type: 'bopis',
+      origin: 'adhoc',
+      priority: 'P1',
+      state: 'IN_PROGRESS',
+      location: 'Pickup desk',
+      dueAt: now + 12 * MINUTE,
+      estimatedMinutes: 8,
+      customerImpact: 0.8,
+      assigneeId: 'a2',
+      createdAt: now - 10 * MINUTE,
+      workedMs: 0,
+      startedAt: now - 3 * MINUTE,
+    },
+    {
+      id: 't7',
+      title: 'Face up cereal shelves',
+      type: 'restock',
+      origin: 'planned',
+      priority: 'P3',
+      state: 'IN_PROGRESS',
+      location: 'Aisle 2',
+      dueAt: now + 90 * MINUTE,
+      estimatedMinutes: 25,
+      customerImpact: 0.2,
+      assigneeId: 'a3',
+      createdAt: now - 90 * MINUTE,
+      workedMs: 0,
+      startedAt: now - 10 * MINUTE,
+    },
+    {
+      id: 't8',
+      title: 'Bakery fridge temperature log',
+      type: 'check',
+      origin: 'planned',
+      priority: 'P2',
+      state: 'IN_PROGRESS',
+      location: 'Bakery',
+      dueAt: now + 20 * MINUTE,
+      estimatedMinutes: 5,
+      customerImpact: 0,
+      assigneeId: 'a4',
+      createdAt: now - 30 * MINUTE,
+      workedMs: 0,
+      startedAt: now - 1 * MINUTE,
+    },
+    {
+      id: 't9',
+      title: 'Restock water bottles',
+      type: 'restock',
+      origin: 'planned',
+      priority: 'P2',
+      state: 'ASSIGNED',
+      location: 'Aisle 1',
+      dueAt: now + 45 * MINUTE,
+      estimatedMinutes: 15,
+      customerImpact: 0.4,
+      assigneeId: 'a3',
+      createdAt: now - 40 * MINUTE,
       workedMs: 0,
     },
   ];

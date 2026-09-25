@@ -1,17 +1,21 @@
 import { Alert } from 'react-native';
 import { create } from 'zustand';
 
-import { mockAssociate } from '@/data/mock-tasks';
+import { mockAssociates } from '@/data/mock-tasks';
 import { type TaskChange, taskRepository } from '@/data/task-repository';
 import { rankTasks } from '@/domain/priority';
 import { shouldEscalate } from '@/domain/safety';
 import type { Associate, Task } from '@/domain/types';
 
 type TaskStore = {
+  /** Everyone on shift. */
+  associates: Associate[];
+  /** Who is using this device (no auth yet; switchable for the demo). */
   associate: Associate;
   tasks: Task[];
   loaded: boolean;
   load: () => Promise<void>;
+  setCurrentAssociate: (associateId: string) => void;
   /** Start a task. Any task already in progress is paused onto the stack first. */
   start: (taskId: string) => Promise<void>;
   /** Pause the current task onto the stack and promote the top-ranked task. */
@@ -19,6 +23,8 @@ type TaskStore = {
   /** Resume a paused task, pausing whatever is in progress. */
   resume: (taskId: string) => Promise<void>;
   complete: (taskId: string) => Promise<void>;
+  /** Manager (re)assigns a task. Resolves to whether it succeeded. */
+  assign: (taskId: string, associateId: string) => Promise<boolean>;
   /** Add a new task, e.g. an ad hoc event. Resolves to whether it was saved. */
   addTask: (task: Task) => Promise<boolean>;
   /** Associate takes a P0 ("I'm on it"): records the ack and starts it. */
@@ -64,7 +70,8 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
   };
 
   return {
-    associate: mockAssociate,
+    associates: mockAssociates,
+    associate: mockAssociates[0],
     tasks: [],
     loaded: false,
 
@@ -72,10 +79,20 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
       unsubscribe?.();
       unsubscribe = taskRepository.subscribe(apply);
       try {
-        set({ tasks: await taskRepository.loadTasks(), loaded: true });
+        const [tasks, associates] = await Promise.all([
+          taskRepository.loadTasks(),
+          taskRepository.loadAssociates(),
+        ]);
+        const associate = associates.find((a) => a.id === get().associate.id) ?? associates[0];
+        set({ tasks, associates, associate: associate ?? get().associate, loaded: true });
       } catch (error) {
         console.warn('[task-store] load failed', errorMessage(error));
       }
+    },
+
+    setCurrentAssociate: (associateId) => {
+      const associate = get().associates.find((a) => a.id === associateId);
+      if (associate) set({ associate });
     },
 
     start: async (taskId) => {
@@ -95,6 +112,8 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
     complete: async (taskId) => {
       await run(() => taskRepository.complete(taskId));
     },
+
+    assign: (taskId, associateId) => run(() => taskRepository.assign(taskId, associateId)),
 
     addTask: (task) => run(() => taskRepository.addTask(task)),
 

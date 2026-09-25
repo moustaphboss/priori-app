@@ -42,6 +42,8 @@ export type Task = {
   pausedAt?: number;
   /** Epoch ms. */
   completedAt?: number;
+  /** Epoch ms when a manager last (re)assigned the task. Restarts the P0 ack window. */
+  assignedAt?: number;
   /** Epoch ms when an associate acknowledged a P0 alert. */
   acknowledgedAt?: number;
 };

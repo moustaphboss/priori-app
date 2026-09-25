@@ -14,15 +14,15 @@ export type SimulatedEvent = {
 export const SIMULATED_EVENTS: SimulatedEvent[] = [
   {
     id: 'spill',
-    label: 'Spill reported',
-    description: 'Broken bottle of oil in aisle 5',
+    label: 'Manager: milk spill',
+    description: '"Milk spill in Aisle 3 - clean immediately!"',
     type: 'spill',
     priority: 'P0',
     create: () => ({
-      title: 'Clean up oil spill',
+      title: 'Milk spill in Aisle 3 - clean immediately',
       type: 'spill',
       priority: 'P0',
-      location: 'Aisle 5',
+      location: 'Aisle 3',
       estimatedMinutes: 5,
       customerImpact: 1,
     }),

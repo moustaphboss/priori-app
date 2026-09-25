@@ -14,8 +14,10 @@ export function awaitingAck(task: Task): boolean {
   );
 }
 
+/** The window runs from when the alert was raised, or from the last manager reassignment. */
 export function ackRemainingMs(task: Task, now: number): number {
-  return Math.max(0, task.createdAt + P0_ACK_WINDOW_MS - now);
+  const windowStart = Math.max(task.createdAt, task.assignedAt ?? 0);
+  return Math.max(0, windowStart + P0_ACK_WINDOW_MS - now);
 }
 
 /** Unacknowledged P0 whose window has run out and hasn't been escalated yet. */

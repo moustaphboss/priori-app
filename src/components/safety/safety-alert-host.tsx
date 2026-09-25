@@ -5,21 +5,33 @@ import { Modal } from 'react-native';
 
 import { SafetyAlert } from '@/components/safety/safety-alert';
 import { awaitingAck } from '@/domain/safety';
+import type { Task } from '@/domain/types';
 import { useNow } from '@/hooks/use-now';
 import { useTaskStore } from '@/store/task-store';
 
 const alertSound = require('@/assets/audio/p0-alert.mp3');
 
-/** Shows unacknowledged P0 alerts over every screen, oldest first, with sound and haptics. */
+/**
+ * Shows unacknowledged P0 alerts over every screen, oldest first, with sound and haptics.
+ * Open P0s alert everyone; a P0 dispatched to someone alerts only them.
+ */
 export function SafetyAlertHost() {
   const tasks = useTaskStore((s) => s.tasks);
+  const me = useTaskStore((s) => s.associate.id);
   const { acknowledge } = useTaskStore.getState();
   const [leftToManager, setLeftToManager] = useState<string[]>([]);
   const now = useNow(250);
   const player = useAudioPlayer(alertSound);
 
+  // Keyed by assignment too, so a task reassigned to me alerts again even if I left it earlier.
+  const leaveKey = (t: Task) => `${t.id}:${t.assignedAt ?? ''}`;
   const pending = tasks
-    .filter((t) => awaitingAck(t) && !leftToManager.includes(t.id))
+    .filter(
+      (t) =>
+        awaitingAck(t) &&
+        (t.assigneeId === undefined || t.assigneeId === me) &&
+        !leftToManager.includes(leaveKey(t)),
+    )
     .sort((a, b) => a.createdAt - b.createdAt);
   const top = pending[0];
 
@@ -43,7 +55,7 @@ export function SafetyAlertHost() {
           now={now}
           queued={pending.length - 1}
           onAcknowledge={() => void acknowledge(top.id)}
-          onLeaveToManager={() => setLeftToManager((ids) => [...ids, top.id])}
+          onLeaveToManager={() => setLeftToManager((keys) => [...keys, leaveKey(top)])}
         />
       )}
     </Modal>

@@ -1,7 +1,7 @@
 import { createInMemoryTaskRepository } from '@/data/in-memory-task-repository';
-import { createMockTasks } from '@/data/mock-tasks';
+import { createMockTasks, mockAssociates } from '@/data/mock-tasks';
 import { createSupabaseTaskRepository } from '@/data/supabase-task-repository';
-import type { Task } from '@/domain/types';
+import type { Associate, Task } from '@/domain/types';
 
 /** A change pushed from elsewhere (another device, a server job). */
 export type TaskChange =
@@ -16,6 +16,7 @@ export type TaskChange =
  */
 export interface TaskRepository {
   loadTasks(): Promise<Task[]>;
+  loadAssociates(): Promise<Associate[]>;
   /** Returns an unsubscribe function. */
   subscribe(onChange: (change: TaskChange) => void): () => void;
   /** Start or resume a task, pausing whatever the associate has in progress. */
@@ -23,6 +24,8 @@ export interface TaskRepository {
   /** Pause a task and optionally start `nextTaskId` in the same step. */
   pause(taskId: string, associateId: string, nextTaskId?: string): Promise<Task[]>;
   complete(taskId: string): Promise<Task[]>;
+  /** Manager (re)assigns an open, assigned or escalated task to an associate. */
+  assign(taskId: string, associateId: string): Promise<Task[]>;
   /** "I'm on it" for a P0: fails if someone else acknowledged first. */
   acknowledge(taskId: string, associateId: string): Promise<Task[]>;
   escalateOverdue(): Promise<Task[]>;
@@ -39,4 +42,4 @@ export const dataSource: DataSource =
 export const taskRepository: TaskRepository =
   dataSource === 'supabase'
     ? createSupabaseTaskRepository()
-    : createInMemoryTaskRepository(() => createMockTasks(Date.now()));
+    : createInMemoryTaskRepository(() => createMockTasks(Date.now()), mockAssociates);

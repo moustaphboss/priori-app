@@ -48,6 +48,8 @@ export type AdhocDraft = {
   type: TaskType;
   priority: PriorityClass;
   location?: string;
+  /** Set when a manager dispatches the task to someone directly. */
+  assigneeId?: string;
 };
 
 /** Default time-to-due by class. P0 has no deadline: it has the 30 s ack rule instead. */
@@ -89,7 +91,9 @@ export function createAdhocTask(draft: AdhocDraft, now = Date.now()): Task {
     type: draft.type,
     origin: 'adhoc',
     priority: draft.priority,
-    state: 'READY',
+    state: draft.assigneeId ? 'ASSIGNED' : 'READY',
+    assigneeId: draft.assigneeId,
+    assignedAt: draft.assigneeId ? now : undefined,
     location: draft.location?.trim() || undefined,
     dueAt: dueIn === undefined ? undefined : now + dueIn,
     estimatedMinutes: ESTIMATED_MINUTES[draft.type],

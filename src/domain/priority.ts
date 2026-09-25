@@ -1,4 +1,5 @@
 import { formatDue } from './format';
+import { proximityScore } from './location';
 import { MINUTE, remainingEffortMs } from './time';
 import type { Associate, PriorityClass, Task } from './types';
 
@@ -49,7 +50,7 @@ export function scoreTask(task: Task, associate: Associate, now: number): Ranked
     customer: clamp01(task.customerImpact),
     aging: clamp01((now - task.createdAt) / AGING_WINDOW),
     skill: associate.skills.includes(task.type) ? 1 : 0.5,
-    proximity: task.location !== undefined && task.location === associate.location ? 1 : 0.5,
+    proximity: proximityScore(task.location, associate.location),
   };
 
   const score = (Object.keys(WEIGHTS) as Factor[]).reduce(

@@ -25,6 +25,8 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="intake" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="dispatch" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="assign/[id]" options={{ presentation: 'modal' }} />
       </Stack>
       <SafetyAlertHost />
     </ThemeProvider>

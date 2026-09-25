@@ -1,5 +1,12 @@
 import type { TaskChange, TaskRepository } from '@/data/task-repository';
-import type { PriorityClass, Task, TaskOrigin, TaskState, TaskType } from '@/domain/types';
+import type {
+  Associate,
+  PriorityClass,
+  Task,
+  TaskOrigin,
+  TaskState,
+  TaskType,
+} from '@/domain/types';
 import { getSupabase } from '@/lib/supabase';
 
 /** Row shape of `public.tasks` (see supabase/migrations). */
@@ -21,6 +28,7 @@ type TaskRow = {
   paused_at: string | null;
   completed_at: string | null;
   acknowledged_at: string | null;
+  assigned_at: string | null;
   version: number;
 };
 
@@ -46,6 +54,7 @@ function toTask(row: TaskRow): Task {
     pausedAt: toMs(row.paused_at),
     completedAt: toMs(row.completed_at),
     acknowledgedAt: toMs(row.acknowledged_at),
+    assignedAt: toMs(row.assigned_at),
   };
 }
 
@@ -78,6 +87,22 @@ export function createSupabaseTaskRepository(): TaskRepository {
 
   return {
     loadTasks,
+
+    loadAssociates: async () => {
+      const { data, error } = await getSupabase()
+        .from('associates')
+        .select('id, name, skills, location')
+        .order('id');
+      if (error) throw new Error(error.message);
+      return (data ?? []).map(
+        (row): Associate => ({
+          id: row.id,
+          name: row.name,
+          skills: row.skills as TaskType[],
+          location: row.location ?? undefined,
+        }),
+      );
+    },
 
     subscribe: (onChange: (change: TaskChange) => void) => {
       const supabase = getSupabase();
@@ -117,6 +142,9 @@ export function createSupabaseTaskRepository(): TaskRepository {
 
     complete: (taskId) => rpc('complete_task', { p_task: taskId }),
 
+    assign: (taskId, associateId) =>
+      rpc('assign_task', { p_task: taskId, p_associate: associateId }),
+
     acknowledge: (taskId, associateId) =>
       rpc('acknowledge_p0', { p_task: taskId, p_associate: associateId }),
 
@@ -138,6 +166,7 @@ export function createSupabaseTaskRepository(): TaskRepository {
           estimated_minutes: task.estimatedMinutes,
           customer_impact: task.customerImpact,
           assignee_id: task.assigneeId ?? null,
+          assigned_at: toIso(task.assignedAt),
         })
         .select();
       if (error) throw new Error(error.message);

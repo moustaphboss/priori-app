@@ -70,6 +70,9 @@ export default function NowScreen() {
               <ThemedText style={styles.reportLabel}>+ Report</ThemedText>
             </Pressable>
           </View>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.signedIn}>
+            {associate.name} · {associate.location}
+          </ThemedText>
 
           {showSwitch && (
             <SwitchPrompt
@@ -101,6 +104,9 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     maxWidth: MaxContentWidth,
+  },
+  signedIn: {
+    marginTop: -Spacing.two,
   },
   header: {
     flexDirection: 'row',
