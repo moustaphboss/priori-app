@@ -5,6 +5,23 @@ import { Platform } from 'react-native';
 /** Android channel for P0 alerts (max importance). Must match `channelId` sent by the server. */
 export const SAFETY_CHANNEL = 'safety';
 
+/** Category for P0 pushes, with an "I'm on it" button. Must match `categoryId` sent by the server. */
+export const P0_CATEGORY = 'p0-alert';
+export const ACK_ACTION = 'ack';
+
+/** Registers notification action buttons. Safe to call repeatedly. */
+export async function registerNotificationCategories(): Promise<void> {
+  if (Platform.OS === 'web') return;
+  await Notifications.setNotificationCategoryAsync(P0_CATEGORY, [
+    {
+      identifier: ACK_ACTION,
+      buttonTitle: "I'm on it",
+      // Foreground the app so the acknowledgement runs even if the app was killed.
+      options: { opensAppToForeground: true },
+    },
+  ]);
+}
+
 // In the foreground the app shows P0s as a full-screen alert already, so skip the system banner.
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {

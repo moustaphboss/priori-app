@@ -29,6 +29,8 @@ export type Notice = {
   priority: TaskRow['priority'];
   /** Safety-critical: max-importance channel, time-sensitive on iOS. */
   urgent: boolean;
+  /** Notification category with action buttons (see P0_CATEGORY in the app). */
+  category?: 'p0-alert';
 };
 
 const MANAGER = 'manager';
@@ -65,6 +67,8 @@ export function decideNotification({ type, record: task, old_record: old }: Task
       title: `P0 · ${task.title}`,
       body: `${where}Acknowledge within 30 s.`,
       urgent: true,
+      // Adds the "I'm on it" button.
+      category: 'p0-alert',
     };
   }
 
