@@ -3,12 +3,19 @@ import { StyleSheet, Text, View } from 'react-native';
 import { PriorityColors, Spacing } from '@/constants/theme';
 import type { PriorityClass } from '@/domain/types';
 
-export function PriorityBadge({ priority }: { priority: PriorityClass }) {
+type PriorityBadgeProps = {
+  priority: PriorityClass;
+  /** White badge with coloured text, for use on a coloured background. */
+  inverted?: boolean;
+};
+
+export function PriorityBadge({ priority, inverted }: PriorityBadgeProps) {
+  const color = PriorityColors[priority];
   return (
     <View
       accessibilityLabel={`Priority ${priority}`}
-      style={[styles.badge, { backgroundColor: PriorityColors[priority] }]}>
-      <Text style={styles.label}>{priority}</Text>
+      style={[styles.badge, { backgroundColor: inverted ? '#ffffff' : color }]}>
+      <Text style={[styles.label, inverted && { color }]}>{priority}</Text>
     </View>
   );
 }

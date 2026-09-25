@@ -66,7 +66,12 @@ export function ManagerView() {
                 accessibilityHint="Choose who should take this task"
                 onPress={() => router.push({ pathname: '/assign/[id]', params: { id: task.id } })}
                 style={({ pressed }) => pressed && styles.pressed}>
-                <TaskCard task={task} now={now} reason={`${reason} · Tap to assign`} />
+                <TaskCard
+                  task={task}
+                  now={now}
+                  reason={`${reason} · Tap to assign`}
+                  alert={task.state === 'ESCALATED'}
+                />
               </Pressable>
             ))
           )}

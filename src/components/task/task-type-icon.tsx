@@ -18,20 +18,34 @@ const ICONS: Record<TaskType, SymbolViewProps['name']> = {
   },
 };
 
-export function TaskTypeIcon({ type, size = 22 }: { type: TaskType; size?: number }) {
+type TaskTypeIconProps = {
+  type: TaskType;
+  size?: number;
+  /** White icon on a translucent circle, for use on a coloured background. */
+  inverted?: boolean;
+};
+
+export function TaskTypeIcon({ type, size = 22, inverted }: TaskTypeIconProps) {
   const theme = useTheme();
 
   return (
     <ThemedView
       type="backgroundSelected"
       accessibilityLabel={type}
-      style={[styles.container, { width: size * 2, height: size * 2, borderRadius: size }]}>
-      <SymbolView name={ICONS[type]} size={size} tintColor={theme.text} />
+      style={[
+        styles.container,
+        { width: size * 2, height: size * 2, borderRadius: size },
+        inverted && styles.inverted,
+      ]}>
+      <SymbolView name={ICONS[type]} size={size} tintColor={inverted ? '#ffffff' : theme.text} />
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
+  inverted: {
+    backgroundColor: 'rgba(255,255,255,0.22)',
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',

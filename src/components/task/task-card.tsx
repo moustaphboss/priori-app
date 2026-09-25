@@ -27,38 +27,49 @@ export type TaskCardProps = {
   elapsedMs?: number;
   /** Omit to render the card without action buttons. */
   onAction?: (action: TaskAction) => void;
+  /** Solid red, high-contrast treatment for tasks that need attention now (e.g. escalated). */
+  alert?: boolean;
 };
 
-export function TaskCard({ task, now, reason, elapsedMs, onAction }: TaskCardProps) {
+export function TaskCard({ task, now, reason, elapsedMs, onAction, alert }: TaskCardProps) {
   const due = formatDue(task.dueAt, now);
   const meta = [task.location, due].filter(Boolean).join(' · ');
   const actions = onAction ? availableActions(task.state) : [];
 
   return (
-    <ThemedView type="backgroundElement" style={styles.card}>
+    <ThemedView type="backgroundElement" style={[styles.card, alert && styles.alertCard]}>
       <View style={styles.header}>
-        <TaskTypeIcon type={task.type} />
+        <TaskTypeIcon type={task.type} inverted={alert} />
         <View style={styles.text}>
-          <ThemedText type="default" style={styles.title}>
+          <ThemedText type="default" style={[styles.title, alert && styles.alertText]}>
             {task.title}
           </ThemedText>
           {meta !== '' && (
             <ThemedText
               type="small"
               themeColor="textSecondary"
-              style={isOverdue(task.dueAt, now) && { color: PriorityColors.P0 }}>
+              style={[
+                isOverdue(task.dueAt, now) && { color: PriorityColors.P0 },
+                alert && styles.alertMuted,
+              ]}>
               {meta}
             </ThemedText>
           )}
-          {reason && reason !== due && <ThemedText type="smallBold">{reason}</ThemedText>}
+          {reason && reason !== due && (
+            <ThemedText type="smallBold" style={alert && styles.alertText}>
+              {reason}
+            </ThemedText>
+          )}
         </View>
-        <PriorityBadge priority={task.priority} />
+        <PriorityBadge priority={task.priority} inverted={alert} />
       </View>
 
       {elapsedMs !== undefined && (
         <View style={styles.timer} accessibilityLabel={`Worked ${formatDuration(elapsedMs)}`}>
-          <ThemedText style={styles.timerValue}>{formatDuration(elapsedMs)}</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
+          <ThemedText style={[styles.timerValue, alert && styles.alertText]}>
+            {formatDuration(elapsedMs)}
+          </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" style={alert && styles.alertMuted}>
             of {task.estimatedMinutes} min est.
           </ThemedText>
         </View>
@@ -85,6 +96,15 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     padding: Spacing.three,
     gap: Spacing.three,
+  },
+  alertCard: {
+    backgroundColor: PriorityColors.P0,
+  },
+  alertText: {
+    color: '#ffffff',
+  },
+  alertMuted: {
+    color: 'rgba(255,255,255,0.85)',
   },
   header: {
     flexDirection: 'row',
