@@ -33,6 +33,30 @@ export type AssigneeRecommendation = {
 
 export type DispatchTarget = Pick<Task, 'type' | 'priority' | 'location'>;
 
+/** What an associate is doing right now, independent of any task being dispatched. */
+function workload(associate: Associate, tasks: Task[]) {
+  const mine = tasks.filter((t) => t.assigneeId === associate.id);
+  const current = mine.find((t) => t.state === 'IN_PROGRESS');
+  const queued = mine.filter((t) => t.state === 'ASSIGNED' || t.state === 'PAUSED').length;
+  return { current, queued, location: current?.location ?? associate.location };
+}
+
+/**
+ * The team in its usual order with task-independent facts only (free/busy, queue).
+ * Used before we know enough about a task to recommend anyone.
+ */
+export function describeTeam(associates: Associate[], tasks: Task[]): AssigneeRecommendation[] {
+  return associates.map((associate) => {
+    const { current, queued, location } = workload(associate, tasks);
+    const reasons = [
+      current ? `Busy with a ${current.priority} task` : 'Free now',
+      location,
+      queued > 0 ? `${queued} queued` : undefined,
+    ].filter((r): r is string => r !== undefined);
+    return { associate, score: 0, reasons, location };
+  });
+}
+
 export function recommendAssignees(
   task: DispatchTarget,
   associates: Associate[],
@@ -40,10 +64,7 @@ export function recommendAssignees(
 ): AssigneeRecommendation[] {
   return associates
     .map((associate) => {
-      const mine = tasks.filter((t) => t.assigneeId === associate.id);
-      const current = mine.find((t) => t.state === 'IN_PROGRESS');
-      const queued = mine.filter((t) => t.state === 'ASSIGNED' || t.state === 'PAUSED').length;
-      const location = current?.location ?? associate.location;
+      const { current, queued, location } = workload(associate, tasks);
 
       const trained = associate.skills.includes(task.type);
       const skill = trained ? 1 : 0.3;

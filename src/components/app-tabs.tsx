@@ -2,10 +2,12 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useColorScheme } from 'react-native';
 
 import { Colors } from '@/constants/theme';
+import { useTaskStore } from '@/store/task-store';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const isManager = useTaskStore((s) => s.role === 'manager');
 
   return (
     <NativeTabs
@@ -13,18 +15,10 @@ export default function AppTabs() {
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}>
       <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Now</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>{isManager ? 'Store' : 'Now'}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
+          sf={isManager ? 'person.3.fill' : 'house.fill'}
           src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="manager">
-        <NativeTabs.Trigger.Label>Manager</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          sf="person.3.fill"
-          src={require('@/assets/images/tabIcons/explore.png')}
           renderingMode="template"
         />
       </NativeTabs.Trigger>

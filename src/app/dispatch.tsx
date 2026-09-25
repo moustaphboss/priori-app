@@ -9,7 +9,7 @@ import { SheetLayout } from '@/components/sheet-layout';
 import { ActionButton } from '@/components/task/action-button';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
-import { recommendAssignees } from '@/domain/dispatch';
+import { describeTeam, recommendAssignees } from '@/domain/dispatch';
 import { createAdhocTask } from '@/domain/intake';
 import { useTaskDraft } from '@/hooks/use-task-draft';
 import { useTaskStore } from '@/store/task-store';
@@ -24,12 +24,16 @@ export default function DispatchScreen() {
   const [choice, setChoice] = useState<AssigneeChoice>();
   const [saving, setSaving] = useState(false);
 
-  const recommendations = recommendAssignees(
-    { type: draft.type, priority: draft.priority, location: draft.location },
-    associates,
-    tasks,
-  );
-  const assigneeId = choice === undefined ? recommendations[0]?.associate.id : choice;
+  // Only rank people once we know what the task is; otherwise the "best" pick would be noise.
+  const options = draft.isUnderstood
+    ? recommendAssignees(
+        { type: draft.type, priority: draft.priority, location: draft.location },
+        associates,
+        tasks,
+      )
+    : describeTeam(associates, tasks);
+  const assigneeId =
+    choice !== undefined ? choice : draft.isUnderstood ? options[0]?.associate.id : null;
   const assigneeName = associates.find((a) => a.id === assigneeId)?.name;
 
   const submit = async () => {
@@ -54,7 +58,15 @@ export default function DispatchScreen() {
       title="Dispatch"
       footer={
         <ActionButton
-          label={saving ? 'Sending…' : assigneeName ? `Send to ${assigneeName}` : 'Post to everyone'}
+          label={
+            saving
+              ? 'Sending…'
+              : !draft.isValid
+                ? 'Send'
+                : assigneeName
+                  ? `Send to ${assigneeName}`
+                  : 'Post to everyone'
+          }
           disabled={!draft.isValid || saving}
           onPress={() => void submit()}
         />
@@ -64,11 +76,17 @@ export default function DispatchScreen() {
         <ThemedText type="smallBold" themeColor="textSecondary">
           ASSIGN TO
         </ThemedText>
+        {!draft.isUnderstood && (
+          <ThemedText type="small" themeColor="textSecondary">
+            Describe the task or pick a type to get a recommendation.
+          </ThemedText>
+        )}
         <AssigneePicker
-          recommendations={recommendations}
+          recommendations={options}
           value={assigneeId ?? null}
           onChange={setChoice}
           allowOpen
+          ranked={draft.isUnderstood}
         />
       </View>
     </SheetLayout>

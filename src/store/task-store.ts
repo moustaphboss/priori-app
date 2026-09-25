@@ -7,15 +7,23 @@ import { rankTasks } from '@/domain/priority';
 import { shouldEscalate } from '@/domain/safety';
 import type { Associate, Task } from '@/domain/types';
 
+export type Role = 'associate' | 'manager';
+
+/** Persona id for the store manager in the switcher (associates use their own id). */
+export const MANAGER_PERSONA = 'manager';
+
 type TaskStore = {
   /** Everyone on shift. */
   associates: Associate[];
   /** Who is using this device (no auth yet; switchable for the demo). */
+  role: Role;
+  /** The associate this device acts as. Kept when switching to manager, so switching back restores it. */
   associate: Associate;
   tasks: Task[];
   loaded: boolean;
   load: () => Promise<void>;
-  setCurrentAssociate: (associateId: string) => void;
+  /** Switch persona: an associate id, or MANAGER_PERSONA. */
+  switchPersona: (personaId: string) => void;
   /** Start a task. Any task already in progress is paused onto the stack first. */
   start: (taskId: string) => Promise<void>;
   /** Pause the current task onto the stack and promote the top-ranked task. */
@@ -71,6 +79,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
 
   return {
     associates: mockAssociates,
+    role: 'associate',
     associate: mockAssociates[0],
     tasks: [],
     loaded: false,
@@ -90,9 +99,13 @@ export const useTaskStore = create<TaskStore>()((set, get) => {
       }
     },
 
-    setCurrentAssociate: (associateId) => {
-      const associate = get().associates.find((a) => a.id === associateId);
-      if (associate) set({ associate });
+    switchPersona: (personaId) => {
+      if (personaId === MANAGER_PERSONA) {
+        set({ role: 'manager' });
+        return;
+      }
+      const associate = get().associates.find((a) => a.id === personaId);
+      if (associate) set({ role: 'associate', associate });
     },
 
     start: async (taskId) => {

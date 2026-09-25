@@ -14,18 +14,17 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTaskStore } from '@/store/task-store';
 
 export default function AppTabs() {
+  const isManager = useTaskStore((s) => s.role === 'manager');
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Now</TabButton>
-          </TabTrigger>
-          <TabTrigger name="manager" href="/manager" asChild>
-            <TabButton>Manager</TabButton>
+            <TabButton>{isManager ? 'Store' : 'Now'}</TabButton>
           </TabTrigger>
           <TabTrigger name="simulate" href="/simulate" asChild>
             <TabButton>Simulate</TabButton>

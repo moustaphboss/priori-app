@@ -8,6 +8,8 @@ export type Suggestion = {
   reason: string;
   /** 'rules' today. An AI suggester can plug in later with 'ai' and the same shape. */
   source: 'rules' | 'ai';
+  /** False when nothing in the text was recognised and these are just defaults. */
+  confident: boolean;
 };
 
 type Rule = { pattern: RegExp; type: TaskType; priority: PriorityClass };
@@ -37,10 +39,17 @@ export function suggestFromText(text: string): Suggestion | undefined {
         priority: rule.priority,
         reason: `Matched “${match[0].toLowerCase()}”`,
         source: 'rules',
+        confident: true,
       };
     }
   }
-  return { type: 'check', priority: 'P3', reason: 'No keywords matched', source: 'rules' };
+  return {
+    type: 'check',
+    priority: 'P3',
+    reason: 'No keywords matched',
+    source: 'rules',
+    confident: false,
+  };
 }
 
 export type AdhocDraft = {

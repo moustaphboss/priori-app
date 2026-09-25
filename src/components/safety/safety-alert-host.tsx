@@ -18,6 +18,8 @@ const alertSound = require('@/assets/audio/p0-alert.mp3');
 export function SafetyAlertHost() {
   const tasks = useTaskStore((s) => s.tasks);
   const me = useTaskStore((s) => s.associate.id);
+  // The manager tracks P0s on the board; full-screen alerts are for the people on the floor.
+  const isManager = useTaskStore((s) => s.role === 'manager');
   const { acknowledge } = useTaskStore.getState();
   const [leftToManager, setLeftToManager] = useState<string[]>([]);
   const now = useNow(250);
@@ -28,6 +30,7 @@ export function SafetyAlertHost() {
   const pending = tasks
     .filter(
       (t) =>
+        !isManager &&
         awaitingAck(t) &&
         (t.assigneeId === undefined || t.assigneeId === me) &&
         !leftToManager.includes(leaveKey(t)),

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ScreenHeader } from '@/components/screen-header';
 import { ActionButton } from '@/components/task/action-button';
 import { PriorityBadge } from '@/components/task/priority-badge';
 import { TaskTypeIcon } from '@/components/task/task-type-icon';
@@ -15,9 +16,7 @@ import { useTaskStore } from '@/store/task-store';
 
 /** Dev panel: inject mock events to demo the ranking changing live. */
 export default function SimulateScreen() {
-  const { addTask, reset, setCurrentAssociate } = useTaskStore.getState();
-  const associates = useTaskStore((s) => s.associates);
-  const me = useTaskStore((s) => s.associate);
+  const { addTask, reset } = useTaskStore.getState();
   const [lastAdded, setLastAdded] = useState<string>();
 
   const fire = async (event: SimulatedEvent) => {
@@ -30,43 +29,14 @@ export default function SimulateScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView edges={['top']} style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.content}>
-          <ThemedText type="title">Simulate</ThemedText>
+          <ScreenHeader title="Simulate" />
           <ThemedText themeColor="textSecondary">
-            Inject store events, then switch to Now to see the ranking react.
+            Inject store events and watch the ranking react. Switch persona in the top-left; use a
+            different one on each device to demo realtime dispatch.
           </ThemedText>
           <ThemedText type="smallBold" themeColor="textSecondary">
             {dataSource === 'supabase' ? 'Data: Supabase (live, shared)' : 'Data: offline mock'}
           </ThemedText>
-
-          <View style={styles.identity}>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              VIEWING AS
-            </ThemedText>
-            <View style={styles.chips}>
-              {associates.map((a) => {
-                const selected = a.id === me.id;
-                return (
-                  <Pressable
-                    key={a.id}
-                    accessibilityRole="radio"
-                    accessibilityState={{ selected }}
-                    onPress={() => setCurrentAssociate(a.id)}
-                    style={({ pressed }) => pressed && styles.pressed}>
-                    <ThemedView
-                      type={selected ? 'backgroundSelected' : 'backgroundElement'}
-                      style={[styles.chip, selected && styles.chipSelected]}>
-                      <ThemedText themeColor={selected ? 'text' : 'textSecondary'}>
-                        {a.name}
-                      </ThemedText>
-                    </ThemedView>
-                  </Pressable>
-                );
-              })}
-            </View>
-            <ThemedText type="small" themeColor="textSecondary">
-              Use a different person on each device to demo realtime dispatch.
-            </ThemedText>
-          </View>
 
           <View style={styles.list}>
             {SIMULATED_EVENTS.map((event) => (
@@ -127,25 +97,6 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: Spacing.two,
-  },
-  identity: {
-    gap: Spacing.two,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
-  },
-  chip: {
-    minHeight: TouchTarget - Spacing.two,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.four,
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  chipSelected: {
-    borderColor: '#1F6FEB',
   },
   row: {
     minHeight: TouchTarget + Spacing.three,

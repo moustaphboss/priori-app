@@ -14,9 +14,17 @@ type AssigneePickerProps = {
   onChange: (value: AssigneeChoice) => void;
   /** Offer "Anyone" (unassigned). */
   allowOpen?: boolean;
+  /** When false, the list isn't a ranking: no "Recommended" label and no scores. */
+  ranked?: boolean;
 };
 
-export function AssigneePicker({ recommendations, value, onChange, allowOpen }: AssigneePickerProps) {
+export function AssigneePicker({
+  recommendations,
+  value,
+  onChange,
+  allowOpen,
+  ranked = true,
+}: AssigneePickerProps) {
   const theme = useTheme();
 
   const option = (key: string, selected: boolean, onPress: () => void, body: React.ReactNode) => (
@@ -50,14 +58,16 @@ export function AssigneePicker({ recommendations, value, onChange, allowOpen }: 
           <>
             <View style={styles.nameRow}>
               <ThemedText style={styles.name}>{rec.associate.name}</ThemedText>
-              {i === 0 && (
+              {ranked && i === 0 && (
                 <ThemedText type="smallBold" themeColor="textSecondary">
                   RECOMMENDED
                 </ThemedText>
               )}
-              <ThemedText type="small" themeColor="textSecondary" style={styles.score}>
-                {Math.round(rec.score * 100)}
-              </ThemedText>
+              {ranked && (
+                <ThemedText type="small" themeColor="textSecondary" style={styles.score}>
+                  {Math.round(rec.score * 100)}
+                </ThemedText>
+              )}
             </View>
             <ThemedText type="small" themeColor="textSecondary">
               {rec.reasons.join(' · ')}

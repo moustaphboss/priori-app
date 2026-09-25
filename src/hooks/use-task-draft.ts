@@ -28,6 +28,9 @@ export function useTaskDraft(initialLocation = '') {
     usingSuggestion:
       suggestion !== undefined && type === suggestion.type && priority === suggestion.priority,
     isValid: description.trim().length >= 3,
+    /** We know what kind of task this is: a keyword matched, or the user picked type or priority. */
+    isUnderstood:
+      typeChoice !== undefined || priorityChoice !== undefined || suggestion?.confident === true,
   };
 }
 
